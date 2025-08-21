@@ -75,7 +75,7 @@ HealthMate responds in **human-like, empathetic chat**, not robotic jargon.
 
 | Layer       | Technology                           |
 |-------------|---------------------------------------|
-| Frontend    | React.js + TailwindCSS               |
+| Frontend    | React.js + CSS               |
 | Chat UI     | Vite + React Hooks                   |
 | Backend     | Node.js + Express.js                 |
 | AI/NLP      | OpenAI GPT API / spaCy               |
@@ -114,4 +114,3 @@ It is a **first-aid conversational tool** to guide you toward informed health de
 > 🚀 HealthMate – helping you take the *first step* toward better health.
 
 ```
-
