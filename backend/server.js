@@ -40,13 +40,13 @@ Symptoms: "${userSymptoms}"
         },
       }
     );
-   const usage = response.data.usageMetadata;
-   if (usage) {
-     console.log(`Tokens used:`);
-     console.log(`  Prompt: ${usage.promptTokenCount}`);
-     console.log(`  Output: ${usage.candidatesTokenCount}`);
-     console.log(`  Total:  ${usage.totalTokenCount}`);
-   }
+    const usage = response.data.usageMetadata;
+    if (usage) {
+      console.log(`Tokens used:`);
+      console.log(`  Prompt: ${usage.promptTokenCount}`);
+      console.log(`  Output: ${usage.candidatesTokenCount}`);
+      console.log(`  Total:  ${usage.totalTokenCount}`);
+    }
     const rawResponseText = response.data.candidates[0].content.parts[0].text;
 
     const cleanedResponse = rawResponseText
@@ -82,6 +82,7 @@ app.post("/api/one-shot-symptom-checker", async (req, res) => {
   const prompt = `
 You are HealthMate - an AI medical assistant.
 Given these symptoms, reply with 2-3 possible conditions, advice, and risk level (Low, Medium, High) in JSON.
+Answer in the following format:
 Example:
 Symptoms: "I have a cough and mild fever"
 Response: {
@@ -146,7 +147,6 @@ Response:
       .json({ error: "Failed to get a valid response from the AI." });
   }
 });
-
 
 // dynamic prompting
 app.post("/api/dynamic-symptom-checker", async (req, res) => {
@@ -224,7 +224,6 @@ Given these symptoms,age and gender if mentioned, reply with 2-3 possible condit
   }
 });
 
-
 app.post("/api/multi-shot-symptom-checker", async (req, res) => {
   const userSymptoms = req.body.symptoms;
   const modelName = "gemini-1.5-flash-latest";
@@ -232,7 +231,7 @@ app.post("/api/multi-shot-symptom-checker", async (req, res) => {
   const prompt = `
 You are HealthMate - an AI medical assistant.
 Given these symptoms, reply with 2-3 possible conditions, advice, and risk level (Low, Medium, High) in JSON.
-
+You need to answer in the following format:
 Examples:
 
 Symptoms: "I have a cough and mild fever"
