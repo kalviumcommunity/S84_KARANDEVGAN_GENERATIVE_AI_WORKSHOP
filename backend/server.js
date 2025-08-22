@@ -40,7 +40,13 @@ Symptoms: "${userSymptoms}"
         },
       }
     );
-
+   const usage = response.data.usageMetadata;
+   if (usage) {
+     console.log(`Tokens used:`);
+     console.log(`  Prompt: ${usage.promptTokenCount}`);
+     console.log(`  Output: ${usage.candidatesTokenCount}`);
+     console.log(`  Total:  ${usage.totalTokenCount}`);
+   }
     const rawResponseText = response.data.candidates[0].content.parts[0].text;
 
     const cleanedResponse = rawResponseText
