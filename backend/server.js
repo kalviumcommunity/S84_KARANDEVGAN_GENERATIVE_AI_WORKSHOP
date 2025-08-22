@@ -296,6 +296,101 @@ Response:
   }
 });
 
+
+app.post("/api/function-calling-symptom-checker", async (req, res) => {
+  const userSymptoms = req.body.symptoms;
+  const modelName = "gemini-1.5-flash-latest";
+
+  try {
+    const response = await axios.post(
+      `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      {
+        contents: [
+          {
+            role: "user",
+            parts: [
+              {
+                text: `You are HealthMate - an AI medical assistant. 
+Always use the function 'get_symptom_analysis' to return structured output.
+Analyze these symptoms: "${userSymptoms}"`,
+              },
+            ],
+          },
+        ],
+        tools: [
+          {
+            function_declarations: [
+              {
+                name: "get_symptom_analysis",
+                description: "Analyze symptoms and return possible conditions",
+                parameters: {
+                  type: "object",
+                  properties: {
+                    possible_conditions: {
+                      type: "array",
+                      items: { type: "string" },
+                      description: "List of 2–3 possible medical conditions",
+                    },
+                    advice: {
+                      type: "string",
+                      description: "Medical advice based on the symptoms",
+                    },
+                    risk_level: {
+                      type: "string",
+                      enum: ["Low", "Medium", "High"],
+                      description: "Risk level of the symptoms",
+                    },
+                  },
+                  required: ["possible_conditions", "advice", "risk_level"],
+                },
+              },
+            ],
+          },
+        ],
+        toolConfig: {
+          functionCallingConfig: {
+            mode: "ANY",
+            allowedFunctionNames: ["get_symptom_analysis"],
+          },
+        },
+      },
+      { headers: { "Content-Type": "application/json" } }
+    );
+
+    // Log full response for debugging
+    console.log(
+      "Full Gemini response:",
+      JSON.stringify(response.data, null, 2)
+    );
+
+    const candidate = response.data.candidates[0];
+
+    // Parts may be [{ functionCall: {...} }, ...]
+    const functionCall = candidate.content.parts.find(
+      (p) => p.functionCall
+    )?.functionCall;
+
+    if (functionCall && functionCall.args) {
+      // Gemini API may return args as either Object or String
+      const structuredResponse =
+        typeof functionCall.args === "string"
+          ? JSON.parse(functionCall.args)
+          : functionCall.args;
+      res.json(structuredResponse);
+      console.log("Function call response:", structuredResponse);
+    } else {
+      res.status(500).json({ error: "No function call returned by AI." });
+    }
+  } catch (error) {
+    console.error(
+      "Function calling failed:",
+      error.response ? error.response.data : error.message
+    );
+    res.status(500).json({ error: "Failed to process function call." });
+  }
+});
+
+
 app.listen(5000, () => {
   console.log("Server running on port 5000");
 });
